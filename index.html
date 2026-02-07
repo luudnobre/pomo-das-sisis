@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dupla Pomodoro • Ludmila & Priscila</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <!-- Background -->
+  <canvas id="particles"></canvas>
+  <div class="bg-glow"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">⏳✨</div>
+      <div class="brand-text">
+        <div class="brand-title">Dupla Pomodoro</div>
+        <div class="brand-sub">Ludmila & Priscila • estudando juntas</div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button class="chip" id="btnRequestNotif" title="Ativar notificações">
+        🔔 Notificações
+      </button>
+
+      <button class="chip" id="btnSoundTest" title="Testar som">
+        🔊 Testar som
+      </button>
+
+      <button class="chip ghost" id="btnResetAll" title="Zerar ciclo e timer">
+        ♻️ Reset geral
+      </button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- Timer Card -->
+    <section class="card timer-card">
+      <div class="card-head">
+        <div class="modes" role="tablist" aria-label="Modos do Pomodoro">
+          <button class="mode active" data-mode="pomodoro" role="tab" aria-selected="true">Foco</button>
+          <button class="mode" data-mode="short" role="tab" aria-selected="false">Pausa Curta</button>
+          <button class="mode" data-mode="long" role="tab" aria-selected="false">Pausa Longa</button>
+        </div>
+
+        <div class="cycle">
+          <div class="cycle-pill" title="Pomodoros concluídos neste ciclo">
+            🍅 <span id="pomoCount">0</span>/4
+          </div>
+          <div class="cycle-pill" title="Sessão atual">
+            <span id="sessionLabel">Sessão: Foco</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="timer-wrap">
+        <div class="ring">
+          <svg viewBox="0 0 120 120" class="ring-svg" aria-hidden="true">
+            <circle class="ring-track" cx="60" cy="60" r="52"></circle>
+            <circle class="ring-progress" cx="60" cy="60" r="52"></circle>
+          </svg>
+
+          <div class="time-stack">
+            <div class="time" id="timeDisplay">25:00</div>
+            <div class="time-hint" id="timeHint">Respira. Entra no foco com leveza.</div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="btn primary" id="btnStart">
+            ▶️ Iniciar
+          </button>
+          <button class="btn" id="btnPause" disabled>
+            ⏸️ Pausar
+          </button>
+          <button class="btn" id="btnSkip" title="Pular para próxima sessão">
+            ⏭️ Pular
+          </button>
+          <button class="btn ghost" id="btnReset">
+            🔄 Reset timer
+          </button>
+        </div>
+
+        <div class="mini-row">
+          <div class="pill">
+            <span class="pill-k">Próximo:</span>
+            <span class="pill-v" id="nextLabel">Pausa Curta (5:00)</span>
+          </div>
+          <div class="pill">
+            <span class="pill-k">Estado:</span>
+            <span class="pill-v" id="stateLabel">Pronta pra começar</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Settings -->
+      <div class="settings">
+        <div class="settings-title">Configurações (estilo Pomofocus + extras ✨)</div>
+
+        <div class="grid">
+          <div class="field">
+            <label for="inpPomo">Foco (min)</label>
+            <input id="inpPomo" type="number" min="1" max="180" value="25" />
+          </div>
+
+          <div class="field">
+            <label for="inpShort">Pausa curta (min)</label>
+            <input id="inpShort" type="number" min="1" max="60" value="5" />
+          </div>
+
+          <div class="field">
+            <label for="inpLong">Pausa longa (min)</label>
+            <input id="inpLong" type="number" min="1" max="120" value="15" />
+          </div>
+
+          <div class="field">
+            <label for="inpLongEvery">Pausa longa a cada (🍅)</label>
+            <input id="inpLongEvery" type="number" min="2" max="12" value="4" />
+          </div>
+
+          <div class="field toggle">
+            <label>Auto-start descanso</label>
+            <div class="switch">
+              <input type="checkbox" id="togAutoBreak" checked />
+              <span class="slider"></span>
+            </div>
+          </div>
+
+          <div class="field toggle">
+            <label>Auto-start foco</label>
+            <div class="switch">
+              <input type="checkbox" id="togAutoFocus" />
+              <span class="slider"></span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="selSound">Som do alarme</label>
+            <select id="selSound">
+              <option value="chime">Chime suave</option>
+              <option value="bell">Sino cristal</option>
+              <option value="beep">Beep clean</option>
+              <option value="gong">Gongo leve</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="rngVol">Volume</label>
+            <input id="rngVol" type="range" min="0" max="100" value="70" />
+          </div>
+
+          <div class="field">
+            <label for="inpFocusTitle">Título do foco (opcional)</label>
+            <input id="inpFocusTitle" type="text" placeholder="Ex: Revisão de neurose / ABNT / Inglês..." />
+          </div>
+        </div>
+
+        <div class="settings-foot">
+          <div class="note">
+            Dica: deixe a guia aberta. Se o navegador permitir, você recebe notificação + som quando terminar.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Goals -->
+    <section class="card goals-card">
+      <div class="card-head goals-head">
+        <div>
+          <h2>Metas da Dupla</h2>
+          <p class="muted">Dois espaços, duas energias — mesma direção. Marca o que for concluindo.</p>
+        </div>
+
+        <div class="duo-badges">
+          <div class="badge" id="badgeSync">🤝 Sincronia: ON</div>
+          <button class="chip small" id="btnToggleSync" title="Quando ON, o título do foco pode ser compartilhado">
+            Alternar
+          </button>
+        </div>
+      </div>
+
+      <div class="goals-grid">
+        <article class="goal-panel" data-person="ludmila">
+          <div class="goal-head">
+            <div class="avatar a1">L</div>
+            <div class="who">
+              <div class="who-name">
+                <input id="nameLud" class="name-input" value="Ludmila" />
+              </div>
+              <div class="who-sub">Metas pessoais</div>
+            </div>
+            <div class="stats">
+              <span class="stat" title="Itens concluídos">✅ <span id="doneLud">0</span></span>
+              <span class="stat" title="Total de itens">🧾 <span id="totalLud">0</span></span>
+            </div>
+          </div>
+
+          <div class="goal-body">
+            <form class="add" id="formAddLud">
+              <input id="inpAddLud" type="text" placeholder="Adicionar meta… (ex: revisar capítulo 2)" />
+              <button class="btn tiny primary" type="submit">+ Add</button>
+            </form>
+
+            <ul class="list" id="listLud"></ul>
+
+            <div class="goal-foot">
+              <button class="chip small ghost" id="btnClearLud">Limpar concluídas</button>
+              <button class="chip small ghost" id="btnWipeLud">Zerar lista</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="goal-panel" data-person="priscila">
+          <div class="goal-head">
+            <div class="avatar a2">P</div>
+            <div class="who">
+              <div class="who-name">
+                <input id="namePri" class="name-input" value="Priscila" />
+              </div>
+              <div class="who-sub">Metas pessoais</div>
+            </div>
+            <div class="stats">
+              <span class="stat" title="Itens concluídos">✅ <span id="donePri">0</span></span>
+              <span class="stat" title="Total de itens">🧾 <span id="totalPri">0</span></span>
+            </div>
+          </div>
+
+          <div class="goal-body">
+            <form class="add" id="formAddPri">
+              <input id="inpAddPri" type="text" placeholder="Adicionar meta… (ex: fazer exercícios 1–10)" />
+              <button class="btn tiny primary" type="submit">+ Add</button>
+            </form>
+
+            <ul class="list" id="listPri"></ul>
+
+            <div class="goal-foot">
+              <button class="chip small ghost" id="btnClearPri">Limpar concluídas</button>
+              <button class="chip small ghost" id="btnWipePri">Zerar lista</button>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="ritual">
+        <h3>Ritual rápido (30s) antes de iniciar</h3>
+        <div class="ritual-grid">
+          <div class="ritual-card">
+            <div class="ritual-ico">🌬️</div>
+            <div class="ritual-txt">Uma respiração profunda. Solta o peso.</div>
+          </div>
+          <div class="ritual-card">
+            <div class="ritual-ico">🎯</div>
+            <div class="ritual-txt">Escolhe 1 micro-meta. Só uma.</div>
+          </div>
+          <div class="ritual-card">
+            <div class="ritual-ico">🕯️</div>
+            <div class="ritual-txt">“Eu estudo com presença e paz.”</div>
+          </div>
+          <div class="ritual-card">
+            <div class="ritual-ico">🧠</div>
+            <div class="ritual-txt">Começa devagar. O foco cresce andando.</div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <div class="muted small">
+          Feito pra vocês duas estudarem com leveza, constância e criatividade.
+        </div>
+      </footer>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
